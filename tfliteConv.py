@@ -2,10 +2,10 @@ import tensorflow as tf
 import numpy as np
 
 # Load the Keras model
-model = tf.keras.models.load_model('health_risk_model.keras')
+model = tf.keras.models.load_model('enhanced_health_risk_model.keras')
 
 # Create a concrete function from the Keras model
-@tf.function(input_signature=[tf.TensorSpec([None, 18], tf.float32)])
+@tf.function(input_signature=[tf.TensorSpec([None, 25], tf.float32)])
 def model_function(input_tensor):
     return model(input_tensor)
 
@@ -17,10 +17,10 @@ converter.optimizations = [tf.lite.Optimize.DEFAULT]
 tflite_model = converter.convert()
 
 # Save the TFLite model
-with open('health_risk_model.tflite', 'wb') as f:
+with open('enhanced_health_risk_model.tflite', 'wb') as f:
     f.write(tflite_model)
 
-print("Model converted and saved as 'health_risk_model.tflite'")
+print("Model converted and saved as 'enhanced_health_risk_model.tflite'")
 
 # Optional: Test the TFLite model
 interpreter = tf.lite.Interpreter(model_content=tflite_model)
@@ -35,6 +35,7 @@ input_data = np.array(np.random.random_sample(input_shape), dtype=np.float32)
 
 interpreter.set_tensor(input_details[0]['index'], input_data)
 interpreter.invoke()
+
 output_data = interpreter.get_tensor(output_details[0]['index'])
 
 print("TFLite model test output shape:", output_data.shape)

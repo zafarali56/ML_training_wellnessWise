@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
-def generate_dataset(num_samples=50000):
+def generate_enhanced_dataset(num_samples=50000):
     np.random.seed(42)
 
     # Generate basic user information
@@ -11,7 +11,7 @@ def generate_dataset(num_samples=50000):
     height = np.random.normal(170, 10, num_samples)
     weight = np.random.normal(70, 15, num_samples)
 
-    # Generate health parameters with more realistic correlations
+    # Generate health parameters
     bmi = weight / ((height / 100) ** 2)
     systolic_bp = np.random.normal(120, 15, num_samples) + (age - 50) * 0.5 + (bmi - 25) * 2
     diastolic_bp = np.random.normal(80, 10, num_samples) + (age - 50) * 0.3 + (bmi - 25) * 1.5
@@ -19,21 +19,30 @@ def generate_dataset(num_samples=50000):
     blood_sugar = np.random.normal(100, 20, num_samples) + (bmi - 25) * 3
     cholesterol = np.random.normal(200, 40, num_samples) + (age - 50) * 1 + (bmi - 25) * 4
 
-    # Generate lifestyle habits with more granularity
-    smoking = np.random.choice([0, 1, 2, 3], num_samples, p=[0.6, 0.2, 0.15, 0.05])  # Non-smoker, Occasional, Regular, Heavy
-    alcohol_consumption = np.random.choice([0, 1, 2, 3, 4], num_samples, p=[0.3, 0.3, 0.2, 0.15, 0.05])  # None, Light, Moderate, Heavy, Very Heavy
-    physical_activity = np.random.choice([0, 1, 2, 3, 4], num_samples, p=[0.1, 0.2, 0.3, 0.3, 0.1])  # Sedentary, Light, Moderate, Active, Very Active
-    diet_quality = np.random.choice([0, 1, 2, 3, 4], num_samples, p=[0.1, 0.2, 0.4, 0.2, 0.1])  # Poor, Fair, Average, Good, Excellent
+    # Generate lifestyle habits
+    smoking = np.random.choice([0, 1, 2, 3], num_samples, p=[0.6, 0.2, 0.15, 0.05])
+    alcohol_consumption = np.random.choice([0, 1, 2, 3, 4], num_samples, p=[0.3, 0.3, 0.2, 0.15, 0.05])
+    physical_activity = np.random.choice([0, 1, 2, 3, 4], num_samples, p=[0.1, 0.2, 0.3, 0.3, 0.1])
+    diet_quality = np.random.choice([0, 1, 2, 3, 4], num_samples, p=[0.1, 0.2, 0.4, 0.2, 0.1])
     sleep_hours = np.clip(np.random.normal(7, 1.5, num_samples), 4, 12)
 
     # Generate environmental factors
     air_quality_index = np.clip(np.random.normal(50, 20, num_samples), 0, 500)
-    stress_level = np.random.choice([0, 1, 2, 3, 4], num_samples, p=[0.1, 0.2, 0.4, 0.2, 0.1])  # Very Low, Low, Moderate, High, Very High
+    stress_level = np.random.choice([0, 1, 2, 3, 4], num_samples, p=[0.1, 0.2, 0.4, 0.2, 0.1])
+    exposure_to_pollutants = np.random.choice([0, 1, 2, 3], num_samples, p=[0.4, 0.3, 0.2, 0.1])
+    access_to_healthcare = np.random.choice([0, 1, 2, 3], num_samples, p=[0.1, 0.2, 0.4, 0.3])
 
-    # Generate health risks with more realistic correlations and ensure balanced distribution
+    # Generate medical history
+    family_history_diabetes = np.random.choice([0, 1], num_samples, p=[0.8, 0.2])
+    family_history_heart_disease = np.random.choice([0, 1], num_samples, p=[0.8, 0.2])
+    family_history_cancer = np.random.choice([0, 1], num_samples, p=[0.8, 0.2])
+    previous_surgeries = np.random.choice([0, 1, 2, 3], num_samples, p=[0.6, 0.2, 0.15, 0.05])
+    chronic_conditions = np.random.choice([0, 1, 2, 3], num_samples, p=[0.7, 0.2, 0.08, 0.02])
+
+    # Generate health risks
     def calculate_risk(base, specific_factors, noise_factor=0.1):
         risk = base + sum(specific_factors) + np.random.normal(0, noise_factor, num_samples)
-        return np.clip(risk, 0, 1)  # Ensure non-negative and max of 1
+        return np.clip(risk, 0, 1)
 
     base_risk = (
         (age / 100) * 0.3 +
@@ -44,21 +53,25 @@ def generate_dataset(num_samples=50000):
         ((4 - diet_quality) / 4) * 0.1 +
         (np.abs(sleep_hours - 7) / 3) * 0.05 +
         (air_quality_index / 500) * 0.05 +
-        (stress_level / 4) * 0.05
+        (stress_level / 4) * 0.05 +
+        (exposure_to_pollutants / 3) * 0.05 +
+        ((3 - access_to_healthcare) / 3) * 0.05
     )
 
     diabetes_risk = calculate_risk(base_risk, [
         ((blood_sugar - 100) / 100) * 0.4,
         ((bmi - 25) / 10) * 0.3,
         ((4 - physical_activity) / 4) * 0.2,
-        ((4 - diet_quality) / 4) * 0.1
+        ((4 - diet_quality) / 4) * 0.1,
+        family_history_diabetes * 0.2
     ])
 
     cardiovascular_disease_risk = calculate_risk(base_risk, [
         ((systolic_bp - 120) / 50) * 0.3,
         ((cholesterol - 200) / 100) * 0.3,
         (smoking / 3) * 0.2,
-        ((4 - physical_activity) / 4) * 0.2
+        ((4 - physical_activity) / 4) * 0.2,
+        family_history_heart_disease * 0.2
     ])
 
     hypertension_risk = calculate_risk(base_risk, [
@@ -79,7 +92,8 @@ def generate_dataset(num_samples=50000):
         (alcohol_consumption / 4) * 0.2,
         ((age - 50) / 30) * 0.2,
         ((4 - diet_quality) / 4) * 0.2,
-        (air_quality_index / 500) * 0.1
+        (air_quality_index / 500) * 0.1,
+        family_history_cancer * 0.2
     ])
 
     # Create DataFrame
@@ -101,6 +115,13 @@ def generate_dataset(num_samples=50000):
         'Sleep_Hours': sleep_hours,
         'Air_Quality_Index': air_quality_index,
         'Stress_Level': stress_level,
+        'Exposure_to_Pollutants': exposure_to_pollutants,
+        'Access_to_Healthcare': access_to_healthcare,
+        'Family_History_Diabetes': family_history_diabetes,
+        'Family_History_Heart_Disease': family_history_heart_disease,
+        'Family_History_Cancer': family_history_cancer,
+        'Previous_Surgeries': previous_surgeries,
+        'Chronic_Conditions': chronic_conditions,
         'Diabetes_Risk': diabetes_risk,
         'Cardiovascular_Disease_Risk': cardiovascular_disease_risk,
         'Hypertension_Risk': hypertension_risk,
@@ -121,13 +142,13 @@ def preprocess_data(df):
 
     return df_encoded
 
-def save_dataset(df, filename='improved_wellness_dataset.csv'):
+def save_dataset(df, filename='enhanced_wellness_dataset.csv'):
     df.to_csv(filename, index=False)
     print(f"Dataset saved as {filename}")
 
 if __name__ == "__main__":
     # Generate dataset
-    dataset = generate_dataset()
+    dataset = generate_enhanced_dataset()
 
     # Preprocess data
     preprocessed_dataset = preprocess_data(dataset)

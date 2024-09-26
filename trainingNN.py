@@ -10,7 +10,7 @@ import seaborn as sns
 
 
 # Load the dataset
-df = pd.read_csv('improved_wellness_dataset.csv')
+df = pd.read_csv('enhanced_wellness_dataset.csv')
 
 # Separate features and target variables
 X = df.drop(['Diabetes_Risk', 'Cardiovascular_Disease_Risk', 'Hypertension_Risk', 'Obesity_Risk', 'Cancer_Risk'], axis=1)
@@ -22,10 +22,12 @@ y = (y - y.min()) / (y.max() - y.min())
 # Split the data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+
 # Scale the features
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
+
 
 def build_model(input_shape):
     model = keras.Sequential([
@@ -50,15 +52,15 @@ history = model.fit(
     batch_size=64,
     verbose=1
 )
-
 # Evaluate the model
 test_loss, test_mae = model.evaluate(X_test_scaled, y_test, verbose=0)
 print(f"Test Mean Absolute Error: {test_mae}")
 
 
-# Save the model in Keras format
-model.save('health_risk_model.keras')
-print("Model saved in Keras format as 'health_risk_model.keras'")
+# Save the model
+model.save('enhanced_health_risk_model.keras')
+print("Model saved as 'enhanced_health_risk_model.keras'")
+
 
 
 # Make predictions
@@ -77,7 +79,7 @@ def classify_risk(prediction):
     else:
         return "Critical"
 
-# Analyze predictions
+# Analyze prediction
 risk_categories = ['Diabetes', 'Cardiovascular Disease', 'Hypertension', 'Obesity', 'Cancer']
 
 for i, category in enumerate(risk_categories):
@@ -89,7 +91,6 @@ for i, category in enumerate(risk_categories):
     print(f"Actual mean risk: {y_test.iloc[:, i].mean():.4f}")
     print(f"MAE: {mean_absolute_error(y_test.iloc[:, i], predictions[:, i]):.4f}")
     print(f"MSE: {mean_squared_error(y_test.iloc[:, i], predictions[:, i]):.4f}")
-
 # Plot training history
 plt.figure(figsize=(12, 4))
 plt.subplot(1, 2, 1)
