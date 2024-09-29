@@ -30,6 +30,8 @@ new_sample_input = pd.DataFrame({
     'Heart_Rate':                   [65,   80,   75,   70,   72,   78,   68,   75,   70,   72],
     'Blood_Sugar':                  [80,   130,  110,  85,   120,  140,  100,  90,   110,  125],
     'Cholesterol':                  [170,  240,  200,  180,  220,  250,  190,  200,  210,  230],
+    'Triglycerides':                [100,  200,  150,  90,   180,  220,  130,  140,  170,  190],  # New feature
+    'Waist_Circumference':          [80,   100,  95,   75,   98,   105,  85,   95,   92,   90],  # New feature
     'Smoking':                      [0,    2,    1,    0,    1,    2,    0,    1,    0,    1],
     'Alcohol_Consumption':          [1,    3,    0,    2,    1,    3,    1,    2,    0,    1],
     'Physical_Activity':            [4,    1,    2,    3,    2,    1,    3,    4,    2,    1],

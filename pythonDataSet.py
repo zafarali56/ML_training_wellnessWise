@@ -19,6 +19,10 @@ def generate_enhanced_dataset(num_samples=50000):
     blood_sugar = np.random.normal(100, 20, num_samples) + (bmi - 25) * 3
     cholesterol = np.random.normal(200, 40, num_samples) + (age - 50) * 1 + (bmi - 25) * 4
 
+    # New features
+    triglycerides = np.random.normal(150, 50, num_samples) + (bmi - 25) * 5 + (age - 50) * 0.5
+    waist_circumference = np.random.normal(90, 15, num_samples) + (bmi - 25) * 2
+
     # Generate lifestyle habits
     smoking = np.random.choice([0, 1, 2, 3], num_samples, p=[0.6, 0.2, 0.15, 0.05])
     alcohol_consumption = np.random.choice([0, 1, 2, 3, 4], num_samples, p=[0.3, 0.3, 0.2, 0.15, 0.05])
@@ -40,60 +44,79 @@ def generate_enhanced_dataset(num_samples=50000):
     chronic_conditions = np.random.choice([0, 1, 2, 3], num_samples, p=[0.7, 0.2, 0.08, 0.02])
 
     # Generate health risks
-    def calculate_risk(base, specific_factors, noise_factor=0.1):
-        risk = base + sum(specific_factors) + np.random.normal(0, noise_factor, num_samples)
-        return np.clip(risk, 0, 1)
+    def calculate_risk(base, specific_factors, noise_factor=0.05):
+        # Combine base risk and specific factors
+        combined_risk = base + sum(specific_factors)
+
+        # Apply sigmoid function to create more mid-range values
+        sigmoid_risk = 1 / (1 + np.exp(-5 * (combined_risk - 0.5)))
+
+        # Add some noise to create more variation
+        noisy_risk = sigmoid_risk + np.random.normal(0, noise_factor, len(base))
+
+        # Clip values to ensure they're between 0 and 1
+        return np.clip(noisy_risk, 0, 1)
 
     base_risk = (
-        (age / 100) * 0.3 +
-        ((bmi - 25) / 10) * 0.2 +
-        (smoking / 3) * 0.15 +
-        (alcohol_consumption / 4) * 0.1 +
-        ((4 - physical_activity) / 4) * 0.1 +
-        ((4 - diet_quality) / 4) * 0.1 +
+        (age / 100) * 0.2 +  # Reduced weight
+        ((bmi - 25) / 10) * 0.15 +  # Reduced weight
+        (smoking / 3) * 0.1 +  # Reduced weight
+        (alcohol_consumption / 4) * 0.08 +  # Reduced weight
+        ((4 - physical_activity) / 4) * 0.08 +
+        ((4 - diet_quality) / 4) * 0.08 +
         (np.abs(sleep_hours - 7) / 3) * 0.05 +
         (air_quality_index / 500) * 0.05 +
         (stress_level / 4) * 0.05 +
         (exposure_to_pollutants / 3) * 0.05 +
-        ((3 - access_to_healthcare) / 3) * 0.05
-    )
+        ((3 - access_to_healthcare) / 3) * 0.05 +
+        ((triglycerides - 150) / 100) * 0.08 +
+        ((waist_circumference - 90) / 20) * 0.08
+    ) / 2  # Divide by 2 to reduce overall base risk
 
+    # Adjust risk calculations for each health condition
     diabetes_risk = calculate_risk(base_risk, [
-        ((blood_sugar - 100) / 100) * 0.4,
-        ((bmi - 25) / 10) * 0.3,
-        ((4 - physical_activity) / 4) * 0.2,
+        ((blood_sugar - 100) / 100) * 0.3,
+        ((bmi - 25) / 10) * 0.2,
+        ((4 - physical_activity) / 4) * 0.15,
         ((4 - diet_quality) / 4) * 0.1,
-        family_history_diabetes * 0.2
+        family_history_diabetes * 0.15,
+        ((triglycerides - 150) / 100) * 0.15,
+        ((waist_circumference - 90) / 20) * 0.15
     ])
 
     cardiovascular_disease_risk = calculate_risk(base_risk, [
-        ((systolic_bp - 120) / 50) * 0.3,
-        ((cholesterol - 200) / 100) * 0.3,
-        (smoking / 3) * 0.2,
-        ((4 - physical_activity) / 4) * 0.2,
-        family_history_heart_disease * 0.2
+        ((systolic_bp - 120) / 50) * 0.25,
+        ((cholesterol - 200) / 100) * 0.25,
+        (smoking / 3) * 0.15,
+        ((4 - physical_activity) / 4) * 0.15,
+        family_history_heart_disease * 0.15,
+        ((triglycerides - 150) / 100) * 0.15,
+        ((waist_circumference - 90) / 20) * 0.1
     ])
 
     hypertension_risk = calculate_risk(base_risk, [
-        ((systolic_bp - 120) / 50) * 0.4,
-        ((diastolic_bp - 80) / 40) * 0.3,
-        (stress_level / 4) * 0.2,
-        (alcohol_consumption / 4) * 0.1
+        ((systolic_bp - 120) / 50) * 0.3,
+        ((diastolic_bp - 80) / 40) * 0.25,
+        (stress_level / 4) * 0.15,
+        (alcohol_consumption / 4) * 0.1,
+        ((waist_circumference - 90) / 20) * 0.15
     ])
 
     obesity_risk = calculate_risk(base_risk, [
-        ((bmi - 25) / 10) * 0.5,
-        ((4 - physical_activity) / 4) * 0.3,
-        ((4 - diet_quality) / 4) * 0.2
+        ((bmi - 25) / 10) * 0.4,
+        ((4 - physical_activity) / 4) * 0.25,
+        ((4 - diet_quality) / 4) * 0.2,
+        ((waist_circumference - 90) / 20) * 0.25
     ])
 
     cancer_risk = calculate_risk(base_risk, [
-        (smoking / 3) * 0.3,
-        (alcohol_consumption / 4) * 0.2,
-        ((age - 50) / 30) * 0.2,
-        ((4 - diet_quality) / 4) * 0.2,
+        (smoking / 3) * 0.25,
+        (alcohol_consumption / 4) * 0.15,
+        ((age - 50) / 30) * 0.15,
+        ((4 - diet_quality) / 4) * 0.15,
         (air_quality_index / 500) * 0.1,
-        family_history_cancer * 0.2
+        family_history_cancer * 0.15,
+        ((waist_circumference - 90) / 20) * 0.1
     ])
 
     # Create DataFrame
@@ -108,6 +131,8 @@ def generate_enhanced_dataset(num_samples=50000):
         'Heart_Rate': heart_rate,
         'Blood_Sugar': blood_sugar,
         'Cholesterol': cholesterol,
+        'Triglycerides': triglycerides,  # New feature
+        'Waist_Circumference': waist_circumference,  # New feature
         'Smoking': smoking,
         'Alcohol_Consumption': alcohol_consumption,
         'Physical_Activity': physical_activity,
@@ -130,6 +155,7 @@ def generate_enhanced_dataset(num_samples=50000):
     })
 
     return df
+
 
 def preprocess_data(df):
     # Encode categorical variables

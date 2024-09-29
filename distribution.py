@@ -5,7 +5,7 @@ from tensorflow import keras
 from sklearn.model_selection import train_test_split
 
 # Load the dataset
-df = pd.read_csv('improved_wellness_dataset.csv')
+df = pd.read_csv('enhanced_wellness_dataset.csv')
 
 # Separate features and targets
 risk_columns = ['Diabetes_Risk', 'Cardiovascular_Disease_Risk', 'Hypertension_Risk', 'Obesity_Risk', 'Cancer_Risk']
@@ -16,7 +16,7 @@ y = df[risk_columns]
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Load the saved model
-model = keras.models.load_model('final_wellness_model.keras', compile=False)
+model = keras.models.load_model('enhanced_health_risk_model.keras', compile=False)
 
 # Compile the model (use the same custom loss function if you used one)
 model.compile(optimizer='adam', loss='mse', metrics=['mae'])

@@ -5,7 +5,7 @@ import seaborn as sns
 from scipy import stats
 
 # Load the dataset
-df = pd.read_csv('improved_wellness_dataset.csv')
+df = pd.read_csv('enhanced_wellness_dataset.csv')
 
 # 1. Basic Statistics
 print("Dataset Shape:", df.shape)
